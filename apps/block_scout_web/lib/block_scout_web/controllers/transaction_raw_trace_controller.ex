@@ -1,7 +1,7 @@
 defmodule BlockScoutWeb.TransactionRawTraceController do
   use BlockScoutWeb, :controller
 
-  alias BlockScoutWeb.{AccessHelpers, TransactionController}
+  alias BlockScoutWeb.{AccessHelpers, TransactionView}
   alias EthereumJSONRPC
   alias Explorer.{Chain, Market}
   alias Explorer.Chain.Import
@@ -79,13 +79,22 @@ defmodule BlockScoutWeb.TransactionRawTraceController do
       )
     else
       {:restricted_access, _} ->
-        TransactionController.set_not_found_view(conn, hash_string)
+        conn
+        |> put_status(404)
+        |> put_view(TransactionView)
+        |> render("not_found.html", transaction_hash: hash_string)
 
       :error ->
-        TransactionController.set_invalid_view(conn, hash_string)
+        conn
+        |> put_status(422)
+        |> put_view(TransactionView)
+        |> render("invalid.html", transaction_hash: hash_string)
 
       {:error, :not_found} ->
-        TransactionController.set_not_found_view(conn, hash_string)
+        conn
+        |> put_status(404)
+        |> put_view(TransactionView)
+        |> render("not_found.html", transaction_hash: hash_string)
     end
   end
 end
